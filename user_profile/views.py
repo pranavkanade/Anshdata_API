@@ -13,3 +13,12 @@ class UserListView(ListAPIView):
 class UserCreateView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
+
+
+class UserGetView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+    queryset = get_user_model().objects.all()
+
+    def get_queryset(self):
+        return get_user_model().objects.filter(pk=self.request.user.id)
