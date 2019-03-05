@@ -11,6 +11,10 @@ class UserListView(ListAPIView):
 
 
 class UserCreateView(CreateAPIView):
+    # TODO: Modify following class.
+    # 1. override get_serializer
+    # 2. override post
+    # 3. override perform_create
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
 
