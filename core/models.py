@@ -44,6 +44,7 @@ class User(AbstractUser):
                               unique=True,
                               db_index=True)
     last_updated = models.DateTimeField(_("Info updated on"),
+                                        null=True,
                                         blank=True,
                                         editable=False,
                                         help_text="This field reflects the date and time"
@@ -54,6 +55,7 @@ class User(AbstractUser):
                                       help_text="This is to simply find if the user is going"
                                                 " to create courses or opting for the courses")
     last_login = models.DateTimeField(_("Last login time"),
+                                      null=True,
                                       blank=True,
                                       editable=False,
                                       help_text="Stores the last login time and date of the user")
@@ -66,12 +68,13 @@ class Producer(models.Model):
                                 on_delete=models.CASCADE,
                                 blank=False,
                                 null=False,
-                                related_name="General User Info",
+                                related_name="Producer_general_user_info",
                                 help_text="Refers to the generic information that platform has collected on signup")
     company_name = models.CharField(_("Company Name"),
                                     max_length=255,
                                     blank=True,
-                                    help_text="Collects ")
+                                    null=True,
+                                    help_text="Collects Company name for which user might be working")
 
 
 class Consumer(models.Model):
@@ -80,9 +83,10 @@ class Consumer(models.Model):
                                 on_delete=models.CASCADE,
                                 blank=False,
                                 null=False,
-                                related_name="General User Info",
+                                related_name="Consumer_general_user_info",
                                 help_text="Refers to the generic information that platform has collected on signup")
     date_of_birth = models.DateField(_("Date of Birth"),
                                      blank=True,
+                                     null=True,
                                      help_text="Field describes the date of birth which will "
                                                "help us find the age of the user")
