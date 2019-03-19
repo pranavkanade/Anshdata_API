@@ -68,7 +68,7 @@ class Producer(models.Model):
                                 on_delete=models.CASCADE,
                                 blank=False,
                                 null=False,
-                                related_name="Producer_general_user_info",
+                                related_name="producer",
                                 help_text="Refers to the generic information that platform has collected on signup")
     company_name = models.CharField(_("Company Name"),
                                     max_length=255,
@@ -83,10 +83,75 @@ class Consumer(models.Model):
                                 on_delete=models.CASCADE,
                                 blank=False,
                                 null=False,
-                                related_name="Consumer_general_user_info",
+                                related_name="consumer",
                                 help_text="Refers to the generic information that platform has collected on signup")
     date_of_birth = models.DateField(_("Date of Birth"),
                                      blank=True,
                                      null=True,
                                      help_text="Field describes the date of birth which will "
                                                "help us find the age of the user")
+
+
+class Course(models.Model):
+    title = models.CharField(_("Title"),
+                             max_length=255,
+                             blank=False,
+                             null=False)
+    # description = models.TextField(_("Course's Description"),
+    #                                blank=True,
+    #                                null=True,
+    #                                default="Test Course")
+    author = models.ForeignKey(User,
+                               on_delete=models.CASCADE,
+                               blank=False,
+                               null=False,
+                               related_name="courses",
+                               help_text="Refers to the creator account of the course")
+    # estimate_time_required = models.IntegerField(_("Estimate Time"),
+    #                                              default=0,
+    #                                              blank=True,
+    #                                              null=False,
+    #                                              help_text="Approx. time required to complete the course")
+
+
+class Unit(models.Model):
+    title = models.CharField(_("Title"),
+                             max_length=255,
+                             blank=False,
+                             null=False)
+    # link_to_lecture = models.URLField(_("Video URL"),
+    #                                   blank=True,
+    #                                   null=True,
+    #                                   default="https://www.youtube.com/watch?v=6MSksJhPcVA")
+    # description = models.TextField(_("Unit's Description"),
+    #                                blank=True,
+    #                                null=True,
+    #                                default="Test Unit")
+    course = models.ForeignKey(Course,
+                               on_delete=models.CASCADE,
+                               blank=False,
+                               null=False,
+                               related_name="units",
+                               help_text="Refers to the course this unit belongs to")
+
+
+class Assignment(models.Model):
+    title = models.CharField(_("Title"),
+                             max_length=255,
+                             blank=False,
+                             null=False)
+    # description = models.TextField(_("Course's Description"),
+    #                                blank=True,
+    #                                null=True,
+    #                                default="Test Course")
+    unit = models.ForeignKey(Unit,
+                             on_delete=models.CASCADE,
+                             blank=False,
+                             null=False,
+                             editable=True,
+                             related_name="assignments")
+    # estimate_time_required = models.IntegerField(_("Estimate Time"),
+    #                                              default=0,
+    #                                              blank=True,
+    #                                              null=False,
+    #                                              help_text="Approx. time required to complete the assignment in hrs")
