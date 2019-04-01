@@ -112,6 +112,10 @@ class Course(models.Model):
     #                                              blank=True,
     #                                              null=False,
     #                                              help_text="Approx. time required to complete the course")
+    students = models.ManyToManyField(User,
+                                      blank=True,
+                                      null=True,
+                                      related_name="enrolled_in")
 
 
 class Unit(models.Model):

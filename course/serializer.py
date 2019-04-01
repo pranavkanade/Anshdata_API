@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
-from core.models import Course, Unit, Assignment
+from core.models import Course, Unit, Assignment, Consumer
 
-from user_profile.serializer import UserSerializer
+from user_profile.serializer import UserSerializer, ConsumerSerializer
 
 
 class CourseSerializer(ModelSerializer):
@@ -10,7 +10,7 @@ class CourseSerializer(ModelSerializer):
     """
     class Meta:
         model = Course
-        fields = ('id', 'author', 'title', )
+        fields = ('id', 'author', 'title', 'students')
         read_only_fields = ('author', )
 
 
@@ -47,6 +47,7 @@ class AssignmentSerializer(ModelSerializer):
 # NOTE: Following classes can be used to extensive output depending on which class you are using
 class CourseDetailUserSerializer(CourseSerializer):
     author = UserSerializer(many=False, read_only=True)
+    students = UserSerializer(many=True, read_only=True)
 
 
 class CourseDetailUserUnitSerializer(ModelSerializer):
@@ -70,5 +71,7 @@ class CourseIDSerializer(ModelSerializer):
     class Meta:
         model = Course
         fields = ('id',)
-#
-#
+
+
+class CourseEnrollSerializer(CourseSerializer):
+    students = UserSerializer(many=True, read_only=False)
