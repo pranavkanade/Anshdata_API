@@ -4,9 +4,10 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from user_profile.serializer import \
-    UserSerializer, UserDetailSerializer, \
-    ProducerSerializer, ProducerDetailedSerializer, \
-    ConsumerSerializer, ConsumerDetailedSerializer
+    UserSerializer, \
+    ProducerDetailedSerializer, \
+    ConsumerDetailedSerializer, \
+    UserCoursesEnrolledSerializer
 
 
 class UserListView(ListAPIView):
@@ -48,6 +49,15 @@ class UserCreateView(CreateAPIView):
 class UserGetView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
+    queryset = get_user_model().objects.all()
+
+    def get_queryset(self):
+        return get_user_model().objects.filter(pk=self.request.user.id)
+
+
+class ListUserEnrolledCoursesView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserCoursesEnrolledSerializer
     queryset = get_user_model().objects.all()
 
     def get_queryset(self):

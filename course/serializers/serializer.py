@@ -1,8 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from core.models import Course, Unit, Assignment
 
-from user_profile.serializer import UserSerializer
-
 
 class CourseSerializer(ModelSerializer):
     """
@@ -10,7 +8,7 @@ class CourseSerializer(ModelSerializer):
     """
     class Meta:
         model = Course
-        fields = ('id', 'author', 'title', )
+        fields = ('id', 'author', 'title', 'students')
         read_only_fields = ('author', )
 
 
@@ -44,24 +42,6 @@ class AssignmentSerializer(ModelSerializer):
         return response
 
 
-# NOTE: Following classes can be used to extensive output depending on which class you are using
-class CourseDetailUserSerializer(CourseSerializer):
-    author = UserSerializer(many=False, read_only=True)
-
-
-class CourseDetailUserUnitSerializer(ModelSerializer):
-    """
-    This class is responsible for serializing the Course model
-    """
-    units = UnitSerializer(many=True, read_only=True)
-    author = UserSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = Course
-        fields = ('id', 'author', 'title', 'units')
-        read_only_fields = ('author', 'units')
-
-
 # NOTE: Get id only
 class CourseIDSerializer(ModelSerializer):
     """
@@ -70,5 +50,4 @@ class CourseIDSerializer(ModelSerializer):
     class Meta:
         model = Course
         fields = ('id',)
-#
-#
+
