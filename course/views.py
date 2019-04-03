@@ -5,8 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 
-from course.serializer import CourseSerializer, UnitSerializer, AssignmentSerializer, CourseDetailUserSerializer, \
-    CourseEnrollSerializer
+from course.serializers.serializer import CourseSerializer, UnitSerializer, AssignmentSerializer
+from course.serializers.detail_serializer import CourseDetailUserSerializer, CourseEnrollSerializer
+
+from rest_framework.response import Response
 
 
 class CoursesList(ListAPIView):
@@ -46,15 +48,21 @@ class EnrollInCourse(UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         course_obj = get_object_or_404(Course, pk=kwargs['pk'])
+        did_update = False
         # this means the user is not creator
         if course_obj.author.id != request.user.id:
             if request.user not in course_obj.students.all():
                 # If user has already disliked the post. toggle the person's dislike
                 course_obj.students.add(request.user)
+                did_update = True
         else:
             raise PermissionDenied(detail="Users are not allowed to dislike their own post")
-
-        payload = {
-            'students': course_obj.students
-        }
-        return self.partial_update(request, payload)
+        if did_update:
+            payload = {
+                'students': course_obj.students
+            }
+            return self.partial_update(request, payload)
+        else:
+            return Response({
+                "details": "Already Enrolled"
+            })
