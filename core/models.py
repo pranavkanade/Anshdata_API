@@ -116,9 +116,6 @@ class Course(models.Model):
     students = models.ManyToManyField(User,
                                       blank=True,
                                       related_name="enrolled_in")
-    num_of_enrollments = models.IntegerField(_("Enrollments"),
-                                             blank=True,
-                                             default=0)
 
 
 class Unit(models.Model):

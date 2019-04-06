@@ -8,17 +8,27 @@ from rest_framework.exceptions import PermissionDenied
 from course.serializers.serializers import CourseSerializer, UnitSerializer, \
     AssignmentSerializer, LessonSerializer
 from course.serializers.util_serializers import CourseEnrollSerializer
+from course.serializers.detailed_serializers import DetailedCourseSerializer, \
+    DetailedUnitSerializer, DetailedLessonSerializer
 
 from rest_framework.response import Response
 
 
 class CoursesListCreateView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = CourseSerializer
+    serializer_class = DetailedCourseSerializer
     queryset = Course.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        self.serializer_class = DetailedCourseSerializer
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.serializer_class = CourseSerializer
+        return self.create(request, *args, **kwargs)
 
 
 class UnitCreateView(CreateAPIView):
@@ -28,7 +38,7 @@ class UnitCreateView(CreateAPIView):
 
 class UnitListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = UnitSerializer
+    serializer_class = DetailedUnitSerializer
 
     def get_queryset(self):
         return Unit.objects.filter(course=self.kwargs['crs_id'])
@@ -41,7 +51,7 @@ class LessonsCreateView(CreateAPIView):
 
 class LessonsListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = LessonSerializer
+    serializer_class = DetailedLessonSerializer
 
     def get_queryset(self):
         return Lesson.objects.filter(unit=self.kwargs['unt_id'])
@@ -65,7 +75,7 @@ class AssignmentsListView(ListAPIView):
                 return Assignment.objects.filter(
                     course=self.kwargs['crs_id'],
                     unit=self.kwargs['unt_id'],
-                    lesson=self.kwargs['lsn']
+                    lesson=self.kwargs['lsn_id']
                 )
             else:
                 return Assignment.objects.filter(
@@ -94,8 +104,7 @@ class EnrollInCourse(UpdateAPIView):
             raise PermissionDenied(detail="Users are not allowed to enroll in their own course")
         if did_update:
             payload = {
-                'students': course_obj.students,
-                'num_of_enrollments': course_obj.num_of_enrollments+1
+                'students': course_obj.students
             }
             return self.partial_update(request, payload)
         else:
