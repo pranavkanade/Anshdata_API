@@ -62,6 +62,7 @@ class User(AbstractUser):
     objects = UserManager()
 
 
+# TODO: Remove following two classes of users
 class Producer(models.Model):
     user = models.OneToOneField(User,
                                 primary_key=True,
@@ -114,8 +115,10 @@ class Course(models.Model):
     #                                              help_text="Approx. time required to complete the course")
     students = models.ManyToManyField(User,
                                       blank=True,
-                                      null=True,
                                       related_name="enrolled_in")
+    num_of_enrollments = models.IntegerField(_("Enrollments"),
+                                             blank=True,
+                                             default=0)
 
 
 class Unit(models.Model):
@@ -123,10 +126,6 @@ class Unit(models.Model):
                              max_length=255,
                              blank=False,
                              null=False)
-    # link_to_lecture = models.URLField(_("Video URL"),
-    #                                   blank=True,
-    #                                   null=True,
-    #                                   default="https://www.youtube.com/watch?v=6MSksJhPcVA")
     # description = models.TextField(_("Unit's Description"),
     #                                blank=True,
     #                                null=True,
@@ -139,6 +138,23 @@ class Unit(models.Model):
                                help_text="Refers to the course this unit belongs to")
 
 
+class Lesson(models.Model):
+    title = models.CharField(_("Title"),
+                             max_length=255,
+                             blank=False,
+                             null=False)
+    # link_to_lecture = models.URLField(_("Video URL"),
+    #                                   blank=True,
+    #                                   null=True,
+    #                                   default="https://www.youtube.com/watch?v=6MSksJhPcVA")
+    unit = models.ForeignKey(Unit,
+                             on_delete=models.CASCADE,
+                             blank=False,
+                             null=False,
+                             editable=True,
+                             related_name="lessons")
+
+
 class Assignment(models.Model):
     title = models.CharField(_("Title"),
                              max_length=255,
@@ -148,12 +164,35 @@ class Assignment(models.Model):
     #                                blank=True,
     #                                null=True,
     #                                default="Test Course")
+
+    author = models.ForeignKey(User,
+                               on_delete=models.CASCADE,
+                               blank=False,
+                               null=False,
+                               related_name="assignments_contributed",
+                               help_text="Refers to the creator account of the course")
+
+    # Assignments may not be related to any one single lesson or unit.
+    # In that case lesson FK will be left blank.
+    lesson = models.ForeignKey(Lesson,
+                               on_delete=models.CASCADE,
+                               blank=True,
+                               null=True,
+                               editable=True,
+                               related_name="assignments")
     unit = models.ForeignKey(Unit,
                              on_delete=models.CASCADE,
-                             blank=False,
-                             null=False,
+                             blank=True,
+                             null=True,
                              editable=True,
                              related_name="assignments")
+    course = models.ForeignKey(Course,
+                               on_delete=models.CASCADE,
+                               blank=False,
+                               null=False,
+                               editable=True,
+                               related_name="assignments")
+
     # estimate_time_required = models.IntegerField(_("Estimate Time"),
     #                                              default=0,
     #                                              blank=True,
