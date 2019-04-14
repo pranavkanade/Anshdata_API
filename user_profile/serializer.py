@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer
 from django.contrib.auth import get_user_model
 from core.models import Producer, Consumer
 
-from course.serializers.serializer import CourseIDSerializer
+from course.serializers.id_serializers import CourseIdSerializer
 
 
 class UserSerializer(ModelSerializer):
@@ -59,7 +59,7 @@ class ConsumerDetailedSerializer(ConsumerSerializer):
 
 
 class UserCoursesEnrolledSerializer(ModelSerializer):
-    courses = CourseIDSerializer(many=True, source="enrolled_in")
+    courses = CourseIdSerializer(many=True, source="enrolled_in")
 
     class Meta:
         model = get_user_model()

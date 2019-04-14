@@ -1,44 +1,89 @@
-from core.models import Course, Unit, Assignment
+from core.models import Course, Unit, Assignment, Lesson
 
-from rest_framework.generics import ListCreateAPIView, ListAPIView, UpdateAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 
-from course.serializers.serializer import CourseSerializer, UnitSerializer, AssignmentSerializer
-from course.serializers.detail_serializer import CourseDetailUserSerializer, CourseEnrollSerializer
+from course.serializers.serializers import CourseSerializer, UnitSerializer, \
+    AssignmentSerializer, LessonSerializer
+from course.serializers.util_serializers import CourseEnrollSerializer
+from course.serializers.detailed_serializers import DetailedCourseSerializer, \
+    DetailedUnitSerializer, DetailedLessonSerializer
 
 from rest_framework.response import Response
 
 
-class CoursesList(ListAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = CourseDetailUserSerializer
-    queryset = Course.objects.all()
-
-
 class CoursesListCreateView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = CourseSerializer
+    serializer_class = DetailedCourseSerializer
     queryset = Course.objects.all()
 
-    # NOTE: Following function needs to be added here to pass on the
-    # author of the course.
-    # TODO: @here check if the user is producer else raise error
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        self.serializer_class = DetailedCourseSerializer
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.serializer_class = CourseSerializer
+        return self.create(request, *args, **kwargs)
+
+
+class UnitCreateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UnitSerializer
+
+
+class UnitListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DetailedUnitSerializer
+
+    def get_queryset(self):
+        return Unit.objects.filter(course=self.kwargs['crs_id'])
+
+
+class LessonsCreateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LessonSerializer
+
+
+class LessonsListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DetailedLessonSerializer
+
+    def get_queryset(self):
+        return Lesson.objects.filter(unit=self.kwargs['unt_id'])
+
+
+class AssignmentsCreateView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AssignmentSerializer
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
 
-class UnitsListCreateView(ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UnitSerializer
-    queryset = Unit.objects.all()
-
-
-class AssignmentsListCreateView(ListCreateAPIView):
+class AssignmentsListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = AssignmentSerializer
-    queryset = Assignment.objects.all()
+
+    def get_queryset(self):
+        if 'unt_id' in self.kwargs.keys():
+            if 'lsn_id' in self.kwargs.keys():
+                return Assignment.objects.filter(
+                    course=self.kwargs['crs_id'],
+                    unit=self.kwargs['unt_id'],
+                    lesson=self.kwargs['lsn_id']
+                )
+            else:
+                return Assignment.objects.filter(
+                    course=self.kwargs['crs_id'],
+                    unit=self.kwargs['unt_id']
+                )
+        else:
+            return Assignment.objects.filter(course=self.kwargs['crs_id'])
 
 
 class EnrollInCourse(UpdateAPIView):
@@ -56,7 +101,7 @@ class EnrollInCourse(UpdateAPIView):
                 course_obj.students.add(request.user)
                 did_update = True
         else:
-            raise PermissionDenied(detail="Users are not allowed to dislike their own post")
+            raise PermissionDenied(detail="Users are not allowed to enroll in their own course")
         if did_update:
             payload = {
                 'students': course_obj.students
