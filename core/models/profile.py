@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .tags import Tags
+from .tag import Tag
 from .user import User
 
 
@@ -26,11 +26,11 @@ class Profile(models.Model):
     profile_dp = models.ImageField(_('profile picture'), blank=True)
     bio = models.TextField(_('bio'), max_length=255, blank=True)
 
-    interests = models.ManyToManyField(Tags,
+    interests = models.ManyToManyField(Tag,
                                        verbose_name="tags interested in",
                                        related_name='favored_by',
                                        blank=True)
-    expertise = models.ManyToManyField(Tags,
+    expertise = models.ManyToManyField(Tag,
                                        verbose_name="tags expert in",
                                        related_name='experts',
                                        blank=True)
@@ -47,6 +47,10 @@ class Profile(models.Model):
                                         blank=True,
                                         null=False,
                                         default=25)
+    total_credits_spent = models.IntegerField(verbose_name='credits spent in total',
+                                              blank=True,
+                                              null=False,
+                                              default=0)
     # TODO: Add model to store location
     # TODO: Add model to store designation
 
