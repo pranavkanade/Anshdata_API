@@ -1,7 +1,7 @@
 from core.models import Course, Module, Assignment, Lesson
 
 from rest_framework.generics import ListCreateAPIView, ListAPIView, UpdateAPIView, CreateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 
@@ -14,8 +14,13 @@ from course.serializers.detailed_serializers import DetailedCourseSerializer
 # from rest_framework.response import Response
 
 
+class ReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in SAFE_METHODS
+
+
 class CoursesListCreateView(ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated|ReadOnly,)
     serializer_class = DetailedCourseSerializer
     queryset = Course.objects.all()
 
