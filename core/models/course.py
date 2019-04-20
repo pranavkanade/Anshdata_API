@@ -61,9 +61,6 @@ class Course(models.Model):
     #                                              blank=True,
     #                                              null=False,
     #                                              help_text="Approx. time required to complete the course")
-    students = models.ManyToManyField(User,
-                                      blank=True,
-                                      related_name="enrolled_in")
     reviewers = models.ManyToManyField(User,
                                        blank=True,
                                        related_name="courses_reviewed")
@@ -183,3 +180,33 @@ class Assignment(models.Model):
     #                                              blank=True,
     #                                              null=False,
     #                                              help_text="Approx. time required to complete the assignment in hrs")
+
+
+class CourseEnrollment(models.Model):
+    candidate = models.ForeignKey(User,
+                                  on_delete=models.CASCADE,
+                                  blank=False,
+                                  null=False,
+                                  related_name="enrollments",
+                                  help_text="Refers to the candidate who is taking on the associated course")
+    course = models.ForeignKey(Course,
+                               on_delete=models.PROTECT,
+                               blank=False,
+                               null=False,
+                               related_name="enrollments",
+                               help_text="Refers to the course that the candidate has enrolled in")
+    date_enrolled = models.DateTimeField(_('date enrolled'), default=timezone.now)
+    date_completed = models.DateTimeField(_('date completed'), blank=True, null=True)
+    # TODO: Add last visited
+    current_lesson = models.OneToOneField(Lesson,
+                                          on_delete=models.PROTECT,
+                                          blank=True,
+                                          null=True,
+                                          help_text="Refers to the last lesson the user had subscribe to")
+    credit_earned = models.IntegerField(_('credit earned'),
+                                        blank=True,
+                                        default=0,
+                                        help_text="Credit points a user has earned till now in the course")
+
+    class Meta:
+        unique_together = (("candidate", "course"), )
