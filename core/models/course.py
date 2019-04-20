@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+
 
 from .user import User
 from .tag import Tag
@@ -23,10 +25,12 @@ class Course(models.Model):
                                null=False,
                                related_name="courses",
                                help_text="Refers to the creator account of the course")
+    # TODO: we hold this back
     tagged_to = models.ManyToManyField(Tag,
                                        verbose_name="related tags",
                                        related_name='courses',
                                        blank=True)
+    # TODO: we hold this back
     # One course can only belong to single category at first
     category = models.ForeignKey(Category,
                                  verbose_name="related category",
@@ -54,6 +58,7 @@ class Course(models.Model):
                                    blank=True,
                                    null=True,
                                    default="New Course")
+    # TODO: Hold this back
     intro = models.URLField(verbose_name='Intro video')
     # TODO: Estimated time needs to be calculated
     # estimate_time_required = models.IntegerField(_("Estimate Time"),
