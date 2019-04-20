@@ -52,16 +52,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         _('username'),
         max_length=150,
         unique=True,
+        db_index=True,
         help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
         validators=[username_validator],
         error_messages={
             'unique': _("A user with that username already exists."),
         },
     )
-    email = models.EmailField(_('user email'),
-                              blank=False,
-                              unique=True,
-                              db_index=True)
+    email = models.EmailField(
+        _('user email'),
+        blank=False,
+        unique=True,
+        db_index=True,
+        error_messages={
+            'unique': _("A user that email id already exists."),
+        }
+    )
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -76,11 +82,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    last_login = models.DateTimeField(_("Last login time"),
-                                      null=True,
-                                      blank=True,
-                                      editable=False,
-                                      help_text="Stores the last login time and date of the user")
 
     objects = UserManager()
 
