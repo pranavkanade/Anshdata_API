@@ -1,22 +1,28 @@
 from django.urls import path
-from course.views import CoursesListCreateView, EnrollInCourse
-# from course.views import CoursesListCreateView, UnitListView, \
-#     AssignmentsListView, EnrollInCourse, LessonsCreateView, \
-#     UnitCreateView, LessonsListView, AssignmentsCreateView
+from course.views import EnrollInCourse,\
+    CoursesListCreateView, CourseRetrieveView,\
+    ModulesListCreateView, ModuleRetrieveView,\
+    LessonListCreateView, LessonRetrieveView,\
+    AssignmentListCreateView, AssignmentRetrieveView
+
 
 app_name = 'course'
 
 urlpatterns = [
     path('', CoursesListCreateView.as_view(), name='create_list_course'),
+    path('<int:pk>/', CourseRetrieveView.as_view(), name='get_course_content'),
     path('enroll/', EnrollInCourse.as_view(), name='enroll'),
-    # path('unt/', UnitCreateView.as_view(), name='create_unit'),
-    # path('<int:crs_id>/unt/', UnitListView.as_view(), name='list_unit'),
-    # path('lsn/', LessonsCreateView.as_view(), name='create_lesson'),
-    # path('<int:unt_id>/lsn/', LessonsListView.as_view(), name='list_lesson'),
-    # path('ex/', AssignmentsCreateView.as_view(), name='create_assignment'),
-    # path('<int:crs_id>/ex/', AssignmentsListView.as_view(), name='list_assignments_crs'),
-    # path('<int:crs_id>/<int:unt_id>/ex/', AssignmentsListView.as_view(), name='list_assignments_crs_unt'),
-    # path('<int:crs_id>/<int:unt_id>/<int:lsn_id>/ex/',
-    #      AssignmentsListView.as_view(),
-    #      name='list_assignments_crs_unt_lsn'),
+    path('mod/', ModulesListCreateView.as_view(), name='create_module'),
+    path('mod/<int:pk>/', ModuleRetrieveView.as_view(), name='get_module_content'),
+    path('<int:crs_id>/mod/', ModulesListCreateView.as_view(), name='list_modules_in_a_course'),
+    path('lsn/', LessonListCreateView.as_view(), name='create_lesson'),
+    path('lsn/<int:pk>/', LessonRetrieveView.as_view(), name='get_lesson_content'),
+    path('<int:mod_id>/lsn/', LessonListCreateView.as_view(), name='list_lessons_in_a_module'),
+    path('ex/', AssignmentListCreateView.as_view(), name='create_assignment'),
+    path('ex/<int:pk>/', AssignmentRetrieveView.as_view(), name='get_assignment_content'),
+    path('<int:crs_id>/ex/', AssignmentListCreateView.as_view(), name='list_assignments_crs'),
+    path('mod/<int:mod_id>/ex/', AssignmentListCreateView.as_view(), name='list_assignments_mod'),
+    path('lsn/<int:lsn_id>/ex/',
+         AssignmentListCreateView.as_view(),
+         name='list_assignments_lsn'),
 ]

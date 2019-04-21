@@ -21,6 +21,51 @@ class CourseSerializer(ModelSerializer):
         read_only_fields = ('id', 'author', )
 
 
+class ModuleSerializer(ModelSerializer):
+    class Meta:
+        model = Module
+        fields = (
+            'id',
+            'author',
+            'title',
+            'description',
+            'course',
+            'reference'
+        )
+        read_only_fields = ('id', 'author', )
+
+
+class LessonSerializer(ModuleSerializer):
+    class Meta:
+        model = Lesson
+        fields = (
+            'id',
+            'author',
+            'title',
+            'description',
+            'lecture',
+            'module'
+        )
+        read_only_fields = ('id', 'author', )
+
+
+class AssignmentSerializer(ModuleSerializer):
+    class Meta:
+        model = Assignment
+        fields = (
+            'id',
+            'author',
+            'title',
+            'instruction',
+            'lesson',
+            'module',
+            'course',
+            'credit_points',
+            'reference'
+        )
+        read_only_fields = ('id', 'author', )
+
+
 class CourseEnrollSerializer(ModelSerializer):
     class Meta:
         model = CourseEnrollment
