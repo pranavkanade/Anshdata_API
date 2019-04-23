@@ -1,6 +1,6 @@
 from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
 
-from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
 from rest_framework import status
 from rest_framework.exceptions import MethodNotAllowed
@@ -36,6 +36,15 @@ class CourseRetrieveView(RetrieveAPIView):
 
     def get_queryset(self):
         return Course.objects.filter(pk=self.kwargs['pk'])
+
+
+# List the unpublished courses
+class SavedCoursesListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = listing.CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(is_published=False, author=self.request.user)
 
 
 class ModulesListCreateView(ListCreateAPIView):

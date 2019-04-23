@@ -37,6 +37,7 @@ class Course(models.Model):
                                  related_name='courses',
                                  blank=False,
                                  on_delete=models.PROTECT)
+    # TODO: Add this aspect of the course in the api which is use to list for enrollment
     is_published = models.BooleanField(verbose_name="is published",
                                        default=False,
                                        blank=True)

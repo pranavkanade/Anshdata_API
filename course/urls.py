@@ -3,13 +3,15 @@ from course.views import EnrollInCourse,\
     CoursesListCreateView, CourseRetrieveView,\
     ModulesListCreateView, ModuleRetrieveView,\
     LessonListCreateView, LessonRetrieveView,\
-    AssignmentListCreateView, AssignmentRetrieveView
+    AssignmentListCreateView, AssignmentRetrieveView,\
+    SavedCoursesListView
 
 
 app_name = 'course'
 
 urlpatterns = [
     path('', CoursesListCreateView.as_view(), name='create_list_course'),
+    path('drafts/', SavedCoursesListView.as_view(), name='list_unpublished_courses'),
     path('<int:pk>/', CourseRetrieveView.as_view(), name='get_course_content'),
     path('enroll/', EnrollInCourse.as_view(), name='enroll'),
     path('mod/', ModulesListCreateView.as_view(), name='create_module'),

@@ -1,11 +1,16 @@
 from rest_framework.serializers import ModelSerializer
 from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
+from user_profile.serializer import UserSerializer
+from adplatform.serializers import CategorySerializer
 
 
 class CourseSerializer(ModelSerializer):
     """
     For creating the course
     """
+    author = UserSerializer(many=False, read_only=True)
+    category = CategorySerializer(many=False, read_only=True)
+
     class Meta:
         model = Course
         fields = (
@@ -24,6 +29,8 @@ class CourseSerializer(ModelSerializer):
 
 
 class ModuleSerializer(ModelSerializer):
+    author = UserSerializer(many=False, read_only=True)
+
     class Meta:
         model = Module
         fields = (
@@ -40,6 +47,8 @@ class ModuleSerializer(ModelSerializer):
 
 
 class LessonSerializer(ModuleSerializer):
+    author = UserSerializer(many=False, read_only=True)
+
     class Meta:
         model = Lesson
         fields = (
