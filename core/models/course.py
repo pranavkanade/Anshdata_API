@@ -201,8 +201,11 @@ class CourseEnrollment(models.Model):
                                null=False,
                                related_name="enrollments",
                                help_text="Refers to the course that the candidate has enrolled in")
-    date_enrolled = models.DateTimeField(_('date enrolled'), default=timezone.now)
-    date_completed = models.DateTimeField(_('date completed'), blank=True, null=True)
+    date_enrolled = models.DateTimeField(_('date enrolled'),
+                                         default=timezone.now)
+    date_completed = models.DateTimeField(_('date completed'),
+                                          blank=True,
+                                          null=True)
     # TODO: Add last visited
     current_lesson = models.OneToOneField(Lesson,
                                           on_delete=models.PROTECT,
