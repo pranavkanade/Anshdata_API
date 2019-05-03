@@ -43,7 +43,20 @@ class ModuleSerializer(ModelSerializer):
             'lessons',
             'assignments'
         )
-        read_only_fields = ('id', 'author', )
+        read_only_fields = ('id', 'author',)
+
+
+class ModuleSerializerMin(ModelSerializer):
+    """
+    For Listing the module min
+    """
+    class Meta:
+        model = Module
+        fields = (
+            'id',
+            'title'
+        )
+        read_only_fields = ('id', )
 
 
 class LessonSerializer(ModuleSerializer):

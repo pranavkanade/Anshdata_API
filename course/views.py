@@ -1,7 +1,7 @@
 from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
 
 from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIView
-from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS, AllowAny
 from rest_framework import status
 from rest_framework.exceptions import MethodNotAllowed
 
@@ -14,7 +14,7 @@ class ReadOnly(BasePermission):
 
 
 class CoursesListCreateView(ListCreateAPIView):
-    permission_classes = (IsAuthenticated|ReadOnly,)
+    permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = listing.CourseSerializer
     queryset = Course.objects.all()
 
@@ -48,7 +48,7 @@ class SavedCoursesListView(ListAPIView):
 
 
 class ModulesListCreateView(ListCreateAPIView):
-    permission_classes = (IsAuthenticated|ReadOnly,)
+    permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = listing.ModuleSerializer
 
     # The following function will list out all the modules of a course
@@ -76,6 +76,14 @@ class ModulesListCreateView(ListCreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
+class ModulesMinListView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = listing.ModuleSerializerMin
+
+    def get_queryset(self):
+        return reversed(Module.objects.filter(course=self.kwargs['crs_id']))
+
+
 class ModuleRetrieveView(RetrieveAPIView):
     permission_classes = (ReadOnly,)
     serializer_class = detailed.ModuleSerializer
@@ -85,7 +93,7 @@ class ModuleRetrieveView(RetrieveAPIView):
 
 
 class LessonListCreateView(ListCreateAPIView):
-    permission_classes = (IsAuthenticated|ReadOnly, )
+    permission_classes = (IsAuthenticated | ReadOnly, )
     serializer_class = listing.LessonSerializer
 
     def get_queryset(self):
@@ -120,7 +128,7 @@ class LessonRetrieveView(RetrieveAPIView):
 
 
 class AssignmentListCreateView(ListCreateAPIView):
-    permission_classes = (IsAuthenticated|ReadOnly, )
+    permission_classes = (IsAuthenticated | ReadOnly, )
     serializer_class = listing.AssignmentSerializer
 
     def get_queryset(self):
