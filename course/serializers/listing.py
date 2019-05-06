@@ -46,19 +46,6 @@ class ModuleSerializer(ModelSerializer):
         read_only_fields = ('id', 'author',)
 
 
-class ModuleSerializerMin(ModelSerializer):
-    """
-    For Listing the module min
-    """
-    class Meta:
-        model = Module
-        fields = (
-            'id',
-            'title'
-        )
-        read_only_fields = ('id', )
-
-
 class LessonSerializer(ModuleSerializer):
     author = UserSerializer(many=False, read_only=True)
 
@@ -73,7 +60,7 @@ class LessonSerializer(ModuleSerializer):
             'module',
             'assignments'
         )
-        read_only_fields = ('id', 'author', )
+        read_only_fields = ('id', 'author',)
 
 
 class AssignmentSerializer(ModuleSerializer):
@@ -91,3 +78,47 @@ class AssignmentSerializer(ModuleSerializer):
             'reference'
         )
         read_only_fields = ('id', 'author', )
+
+
+# Min serializer
+
+class AssignmentSerializerMin(ModelSerializer):
+    class Meta:
+        model = Assignment
+        fields = (
+            'id',
+            'title',
+            'credit_points',
+        )
+        read_only_fields = ('id', )
+
+
+class LessonSerializerMin(ModelSerializer):
+    """
+    For listing the lessons min
+    """
+    class Meta:
+        model = Lesson
+        fields = (
+            'id',
+            'title'
+        )
+
+
+class ModuleSerializerMin(ModelSerializer):
+    """
+    For Listing the module min
+    """
+    lessons = LessonSerializerMin(many=True, read_only=True)
+    assignments = AssignmentSerializerMin(many=True, read_only=True)
+
+    class Meta:
+        model = Module
+        fields = (
+            'id',
+            'title',
+            'description',
+            'lessons',
+            'assignments'
+        )
+        read_only_fields = ('id', )
