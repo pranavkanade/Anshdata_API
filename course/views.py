@@ -169,7 +169,7 @@ class RetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CourseRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+class CourseRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
     permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = detailed.CourseSerializer
 
@@ -177,7 +177,7 @@ class CourseRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         return Course.objects.filter(pk=self.kwargs['pk'])
 
 
-class ModuleRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+class ModuleRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
     permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = detailed.ModuleSerializer
 
