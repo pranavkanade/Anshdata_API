@@ -1,9 +1,9 @@
 from django.urls import path
 from course.views import EnrollInCourse,\
-    CoursesListCreateView, CourseRetrieveView,\
-    ModulesListCreateView, ModuleRetrieveView, ModulesMinListView,\
-    LessonListCreateView, LessonRetrieveView,\
-    AssignmentListCreateView, AssignmentRetrieveView,\
+    CoursesListCreateView, CourseRetrieveUpdateDeleteView,\
+    ModulesListCreateView, ModuleRetrieveUpdateDeleteView, ModulesMinListView,\
+    LessonListCreateView, LessonRetrieveUpdateDeleteView,\
+    AssignmentListCreateView, AssignmentRetrieveUpdateDeleteView,\
     SavedCoursesListView
 
 
@@ -17,8 +17,8 @@ urlpatterns = [
          SavedCoursesListView.as_view(),
          name='list_unpublished_courses'),
     path('<int:pk>/',
-         CourseRetrieveView.as_view(),
-         name='get_course_content'),
+         CourseRetrieveUpdateDeleteView.as_view(),
+         name='course_get_update_delete'),
     path('enroll/',
          EnrollInCourse.as_view(),
          name='enroll'),
@@ -26,8 +26,8 @@ urlpatterns = [
          ModulesListCreateView.as_view(),
          name='create_module'),
     path('mod/<int:pk>/',
-         ModuleRetrieveView.as_view(),
-         name='get_module_content'),
+         ModuleRetrieveUpdateDeleteView.as_view(),
+         name='module_get_update_delete'),
     path('<int:crs_id>/mod/',
          ModulesListCreateView.as_view(),
          name='list_modules_in_a_course'),
@@ -38,8 +38,8 @@ urlpatterns = [
          LessonListCreateView.as_view(),
          name='create_lesson'),
     path('lsn/<int:pk>/',
-         LessonRetrieveView.as_view(),
-         name='get_lesson_content'),
+         LessonRetrieveUpdateDeleteView.as_view(),
+         name='lesson_get_update_delete'),
     path('<int:mod_id>/lsn/',
          LessonListCreateView.as_view(),
          name='list_lessons_in_a_module'),
@@ -47,8 +47,8 @@ urlpatterns = [
          AssignmentListCreateView.as_view(),
          name='create_assignment'),
     path('ex/<int:pk>/',
-         AssignmentRetrieveView.as_view(),
-         name='get_assignment_content'),
+         AssignmentRetrieveUpdateDeleteView.as_view(),
+         name='assignment_get_update_delete'),
     path('<int:crs_id>/ex/',
          AssignmentListCreateView.as_view(),
          name='list_assignments_crs'),

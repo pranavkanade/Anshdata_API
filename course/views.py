@@ -1,9 +1,10 @@
 from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
 
-from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS, AllowAny
 from rest_framework import status
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
+from rest_framework.response import Response
 
 from course.serializers import creation, listing, detailed
 
@@ -28,14 +29,6 @@ class CoursesListCreateView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         self.serializer_class = creation.CourseSerializer
         return self.create(request, *args, **kwargs)
-
-
-class CourseRetrieveView(RetrieveAPIView):
-    permission_classes = (ReadOnly, )
-    serializer_class = detailed.CourseSerializer
-
-    def get_queryset(self):
-        return Course.objects.filter(pk=self.kwargs['pk'])
 
 
 # List the unpublished courses
@@ -84,14 +77,6 @@ class ModulesMinListView(ListAPIView):
         return reversed(Module.objects.filter(course=self.kwargs['crs_id']))
 
 
-class ModuleRetrieveView(RetrieveAPIView):
-    permission_classes = (ReadOnly,)
-    serializer_class = detailed.ModuleSerializer
-
-    def get_queryset(self):
-        return Module.objects.filter(pk=self.kwargs['pk'])
-
-
 class LessonListCreateView(ListCreateAPIView):
     permission_classes = (IsAuthenticated | ReadOnly, )
     serializer_class = listing.LessonSerializer
@@ -117,14 +102,6 @@ class LessonListCreateView(ListCreateAPIView):
                                    code=status.HTTP_405_METHOD_NOT_ALLOWED)
         self.serializer_class = creation.LessonSerializer
         return self.create(request, *args, **kwargs)
-
-
-class LessonRetrieveView(RetrieveAPIView):
-    permission_classes = (ReadOnly,)
-    serializer_class = detailed.LessonSerializer
-
-    def get_queryset(self):
-        return Lesson.objects.filter(pk=self.kwargs['pk'])
 
 
 class AssignmentListCreateView(ListCreateAPIView):
@@ -159,8 +136,65 @@ class AssignmentListCreateView(ListCreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
-class AssignmentRetrieveView(RetrieveAPIView):
-    permission_classes = (ReadOnly,)
+class RetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    # NOTE: copied following fuction from the lib as it is.
+    # with small change - Added a condition to find if the
+    # request is issued by the author itself or someone else.
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        print(instance.author.id)
+        print(request.user.id)
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to update.", code=status.HTTP_401_UNAUTHORIZED)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to delete.", code=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CourseRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated | ReadOnly,)
+    serializer_class = detailed.CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(pk=self.kwargs['pk'])
+
+
+class ModuleRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated | ReadOnly,)
+    serializer_class = detailed.ModuleSerializer
+
+    def get_queryset(self):
+        return Module.objects.filter(pk=self.kwargs['pk'])
+
+
+class LessonRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
+    permission_classes = (IsAuthenticated | ReadOnly,)
+    serializer_class = detailed.LessonSerializer
+
+    def get_queryset(self):
+        return Lesson.objects.filter(pk=self.kwargs['pk'])
+
+
+class AssignmentRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
+    permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = detailed.AssignmentSerializer
 
     def get_queryset(self):
