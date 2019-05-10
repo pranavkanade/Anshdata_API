@@ -18,7 +18,9 @@ class CourseSerializer(ModelSerializer):
             'credit_points',
             'description'
         )
-        read_only_fields = ('id', 'author', )
+        read_only_fields = ('id', 'author',)
+
+    # TODO: Add function to_representation so that it returns name of the category
 
 
 class ModuleSerializer(ModelSerializer):
