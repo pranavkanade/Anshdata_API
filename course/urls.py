@@ -4,7 +4,7 @@ from course.views import EnrollInCourse,\
     ModulesListCreateView, ModuleRetrieveUpdateDeleteView, ModulesMinListView,\
     LessonListCreateView, LessonRetrieveUpdateDeleteView,\
     AssignmentListCreateView, AssignmentRetrieveUpdateDeleteView,\
-    SavedCoursesListView
+    DraftedCoursesCommunityListView, DraftedCoursesSelfListView
 
 
 app_name = 'course'
@@ -13,9 +13,12 @@ urlpatterns = [
     path('',
          CoursesListCreateView.as_view(),
          name='create_list_course'),
-    path('drafts/',
-         SavedCoursesListView.as_view(),
-         name='list_unpublished_courses'),
+    path('drafts/comm/',
+         DraftedCoursesCommunityListView.as_view(),
+         name='list_unpublished_courses_by_community'),
+    path('drafts/me/',
+         DraftedCoursesSelfListView.as_view(),
+         name='list_unpublished_courses_by_current_user'),
     path('<int:pk>/',
          CourseRetrieveUpdateDeleteView.as_view(),
          name='course_get_update_delete'),

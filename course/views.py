@@ -47,8 +47,19 @@ class CoursesListCreateView(ListCreateAPIView):
 
 
 # List the unpublished courses
-class SavedCoursesListView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
+class DraftedCoursesCommunityListView(ListAPIView):
+    permission_classes = (IsAuthenticated | ReadOnly,)
+    serializer_class = listing.CourseSerializer
+
+    def get_queryset(self):
+        if self.request.user == AnonymousUser:
+            return Course.objects.filter(is_published=False)
+        users_to_include = User.objects.exclude(pk=self.request.user.id)
+        return Course.objects.filter(is_published=False, author__in=users_to_include)
+
+
+class DraftedCoursesSelfListView(ListAPIView):
+    permission_classes = (IsAuthenticated, )
     serializer_class = listing.CourseSerializer
 
     def get_queryset(self):
