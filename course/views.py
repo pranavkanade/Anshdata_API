@@ -1,10 +1,13 @@
 from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
+from core.models import User
 
 from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS, AllowAny
 from rest_framework import status
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.response import Response
+
+from django.contrib.auth.models import AnonymousUser
 
 from course.serializers import creation, listing, detailed
 
@@ -17,7 +20,19 @@ class ReadOnly(BasePermission):
 class CoursesListCreateView(ListCreateAPIView):
     permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = listing.CourseSerializer
-    queryset = Course.objects.all()
+    # queryset = Course.objects.all()
+
+    def get_queryset(self):
+        # import pdb; pdb.set_trace()
+        if self.request.user == AnonymousUser:
+            return Course.objects.filter(is_published=True)
+
+        print("test")
+        users_to_include = User.objects.exclude(pk=self.request.user.id)
+        return Course.objects.filter(
+            is_published=True,
+            author__in=users_to_include,
+            enrollments__candidate__in=users_to_include)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
