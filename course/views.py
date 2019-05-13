@@ -28,10 +28,12 @@ class CoursesListCreateView(ListCreateAPIView):
             return Course.objects.filter(is_published=True)
 
         users_to_include = User.objects.exclude(pk=self.request.user.id)
-        return Course.objects.filter(
-            is_published=True,
-            author__in=users_to_include,
-            enrollments__candidate__in=users_to_include)
+        return (
+            Course.objects.filter(
+                is_published=True,
+                author__in=users_to_include
+            ).difference(Course.objects.filter(
+                enrollments__candidate=self.request.user)))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
