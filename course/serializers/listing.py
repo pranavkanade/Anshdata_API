@@ -122,3 +122,14 @@ class ModuleSerializerMin(ModelSerializer):
             'assignments'
         )
         read_only_fields = ('id', )
+
+
+class CourseEnrollSerializer(ModelSerializer):
+    class Meta:
+        model = CourseEnrollment
+        fields = (
+            'id',
+            'candidate',
+            'course'
+        )
+        read_only_fields = ('id', 'candidate', )

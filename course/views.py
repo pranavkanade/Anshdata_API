@@ -27,7 +27,6 @@ class CoursesListCreateView(ListCreateAPIView):
         if self.request.user == AnonymousUser:
             return Course.objects.filter(is_published=True)
 
-        print("test")
         users_to_include = User.objects.exclude(pk=self.request.user.id)
         return Course.objects.filter(
             is_published=True,
@@ -44,6 +43,22 @@ class CoursesListCreateView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         self.serializer_class = creation.CourseSerializer
         return self.create(request, *args, **kwargs)
+
+
+class EnrolledCoursesList(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = listing.CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(enrollments__candidate=self.request.user)
+
+
+class EnrollmentRetrieveView(ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = listing.CourseEnrollSerializer
+
+    def get_queryset(self):
+        return CourseEnrollment.objects.filter(candidate=self.request.user, course=self.kwargs['crs_id'])
 
 
 # List the unpublished courses
