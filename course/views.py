@@ -24,7 +24,7 @@ class CoursesListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         # import pdb; pdb.set_trace()
-        if self.request.user == AnonymousUser:
+        if self.request.user == AnonymousUser():
             return Course.objects.filter(is_published=True)
 
         users_to_include = User.objects.exclude(pk=self.request.user.id)
