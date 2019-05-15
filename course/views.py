@@ -47,6 +47,14 @@ class CoursesListCreateView(ListCreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
+class PublishedCoursesSelfList(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = listing.CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(is_published=True, author=self.request.user)
+
+
 class EnrolledCoursesList(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = listing.CourseSerializer
