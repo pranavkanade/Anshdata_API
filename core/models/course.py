@@ -161,7 +161,7 @@ class Assignment(models.Model):
                                related_name="assignments")
     module = models.ForeignKey(Module,
                                on_delete=models.CASCADE,
-                               blank=False,
+                               blank=True,
                                null=False,
                                editable=True,
                                related_name="assignments")

@@ -5,6 +5,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
 from django.core.mail import send_mail
 from django.utils import timezone
+from .profile import Profile, Social
 
 
 class UserManager(BaseUserManager):
@@ -25,9 +26,11 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, username, email, password=None, **extra_fields):
+    def create_user(self, username, email, password=None, profile=None, social=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
+        extra_fields.setdefault('profile', profile)
+        extra_fields.setdefault('social', social)
         return self._create_user(username, email, password, **extra_fields)
 
     def create_superuser(self, username, email, password, **extra_fields):
@@ -68,6 +71,17 @@ class User(AbstractBaseUser, PermissionsMixin):
             'unique': _("A user that email id already exists."),
         }
     )
+    profile = models.OneToOneField(Profile,
+                                   on_delete=models.PROTECT,
+                                   blank=True,
+                                   null=True,
+                                   related_name='user')
+    social = models.OneToOneField(Social,
+                                  verbose_name='social links',
+                                  null=True,
+                                  blank=True,
+                                  on_delete=models.PROTECT,
+                                  related_name='user')
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,

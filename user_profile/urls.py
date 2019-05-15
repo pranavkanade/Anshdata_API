@@ -1,17 +1,13 @@
-from django.contrib import admin
 from django.urls import path
-from user_profile.views import UserCreateView, UserListView, UserGetView,\
-    ListUserEnrolledCoursesView
+from user_profile.views import UserCreateView, UserRetrieveView
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 
 app_name = 'user_profile'
 
 urlpatterns = [
-    path('me/', UserGetView.as_view(), name='get-loggedin-user'),
+    path('u/<str:usr_name>/', UserRetrieveView.as_view(), name='list-users'),
     path('signup/', UserCreateView.as_view(), name='signup'),
     path('login/', obtain_jwt_token, name='login'),
-    path('refresh/', refresh_jwt_token, name='refresh'),
-    path('all/', UserListView.as_view(), name='list-users'),
-    path('enrolledin/', ListUserEnrolledCoursesView.as_view(), name="enrolledin-courses"),
+    path('refresh/', refresh_jwt_token, name='refresh')
 ]

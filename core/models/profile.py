@@ -2,7 +2,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .tag import Tag
-from .user import User
 
 
 class Social(models.Model):
@@ -15,12 +14,6 @@ class Social(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User,
-                                verbose_name='actual user account',
-                                on_delete=models.CASCADE,
-                                blank=False,
-                                null=False,
-                                related_name='profile')
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     profile_dp = models.ImageField(_('profile picture'), blank=True)
@@ -38,11 +31,6 @@ class Profile(models.Model):
     # Education
     # TODO: Add model to store publication
     # Publications
-    social = models.OneToOneField(Social,
-                                  verbose_name='social links',
-                                  null=True,
-                                  blank=True,
-                                  on_delete=models.PROTECT)
     credit_points = models.IntegerField(verbose_name='credits remaining',
                                         blank=True,
                                         null=False,

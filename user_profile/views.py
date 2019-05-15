@@ -1,16 +1,19 @@
-from django.contrib.auth import get_user_model
-
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from user_profile.serializer import \
-    UserSerializer
+    UserSerializer, UserDetailedSerializer
+
+from core.models.user import User
+from core.models.profile import Profile, Social
 
 
-class UserListView(ListAPIView):
+class UserRetrieveView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-    queryset = get_user_model().objects.all()
+    serializer_class = UserDetailedSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(username=self.kwargs['usr_name'])
 
 
 class UserCreateView(CreateAPIView):
@@ -26,23 +29,8 @@ class UserCreateView(CreateAPIView):
         return self.create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        print("[perform_create] : UserCreateView")
-        serializer.save()
-
-
-class UserGetView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-    queryset = get_user_model().objects.all()
-
-    def get_queryset(self):
-        return get_user_model().objects.filter(pk=self.request.user.id)
-
-
-class ListUserEnrolledCoursesView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    # serializer_class = UserCoursesEnrolledSerializer
-    queryset = get_user_model().objects.all()
-
-    def get_queryset(self):
-        return get_user_model().objects.filter(pk=self.request.user.id)
+        social_payload = dict()
+        social = Social.objects.create(**social_payload)
+        profile_payload = dict()
+        profile = Profile.objects.create(**profile_payload)
+        serializer.save(profile=profile, social=social)
