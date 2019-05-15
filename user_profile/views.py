@@ -17,6 +17,14 @@ class UserRetrieveView(ListAPIView):
         return User.objects.filter(username=self.kwargs['usr_name'])
 
 
+class CurrentUserRetrieveView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.id)
+
+
 class UserCreateView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
