@@ -1,8 +1,9 @@
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from user_profile.serializer import \
-    UserSerializer, UserDetailedSerializer
+    UserSerializer, UserDetailedSerializer,\
+    ProfileSerializer, SocialSerializer
 
 from core.models.user import User
 from core.models.profile import Profile, Social
@@ -34,3 +35,19 @@ class UserCreateView(CreateAPIView):
         profile_payload = dict()
         profile = Profile.objects.create(**profile_payload)
         serializer.save(profile=profile, social=social)
+
+
+class SocialRetrieveUpdateView(RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = SocialSerializer
+
+    def get_queryset(self):
+        return Social.objects.filter(pk=self.kwargs['pk'])
+
+
+class ProfileRetrieveUpdateView(RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ProfileSerializer
+
+    def get_queryset(self):
+        return Profile.objects.filter(pk=self.kwargs['pk'])
