@@ -8,6 +8,7 @@ from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.response import Response
 
 from django.contrib.auth.models import AnonymousUser
+from django.shortcuts import get_object_or_404
 
 from course.serializers import creation, listing, detailed
 
@@ -47,12 +48,13 @@ class CoursesListCreateView(ListCreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
-class PublishedCoursesSelfList(ListAPIView):
+class PublishedCoursesListByUser(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = listing.CourseSerializer
 
     def get_queryset(self):
-        return Course.objects.filter(is_published=True, author=self.request.user)
+        user = get_object_or_404(User, pk=self.kwargs['usr_id'])
+        return Course.objects.filter(is_published=True, author=user)
 
 
 class EnrolledCoursesList(ListAPIView):
