@@ -162,7 +162,7 @@ class Assignment(models.Model):
     module = models.ForeignKey(Module,
                                on_delete=models.CASCADE,
                                blank=True,
-                               null=False,
+                               null=True,
                                editable=True,
                                related_name="assignments")
     course = models.ForeignKey(Course,
