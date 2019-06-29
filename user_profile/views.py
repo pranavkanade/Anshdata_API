@@ -1,19 +1,28 @@
-from django.contrib.auth import get_user_model
-
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from user_profile.serializer import \
-    UserSerializer, \
-    ProducerDetailedSerializer, \
-    ConsumerDetailedSerializer, \
-    UserCoursesEnrolledSerializer
+    UserSerializer, UserDetailedSerializer,\
+    ProfileSerializer, SocialSerializer
+
+from core.models.user import User
+from core.models.profile import Profile, Social
 
 
-class UserListView(ListAPIView):
+class UserRetrieveView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserDetailedSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(username=self.kwargs['usr_name'])
+
+
+class CurrentUserRetrieveView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
-    queryset = get_user_model().objects.all()
+
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.id)
 
 
 class UserCreateView(CreateAPIView):
@@ -22,43 +31,31 @@ class UserCreateView(CreateAPIView):
 
     def get_serializer_class(self, *args, **kwargs):
         print("[get_serializer_class] : UserCreateView")
-        is_producer = False
-        if 'is_producer' in self.request.data.keys():
-            is_producer = self.request.data['is_producer']
-        if is_producer:
-            return ProducerDetailedSerializer
-        else:
-            return ConsumerDetailedSerializer
+        return UserSerializer
 
     def post(self, request, *args, **kwargs):
         print("[post] : UserCreateView")
         return self.create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        print("[perform_create] : UserCreateView")
-        is_producer = False
-        if 'is_producer' in self.request.data.keys():
-            is_producer = self.request.data['is_producer']
-        generic_user = get_user_model().objects.create_user(username=self.request.data['username'],
-                                                            email=self.request.data['email'],
-                                                            password=self.request.data["password"],
-                                                            is_producer=is_producer)
-        serializer.save(user=generic_user)
+        social_payload = dict()
+        social = Social.objects.create(**social_payload)
+        profile_payload = dict()
+        profile = Profile.objects.create(**profile_payload)
+        serializer.save(profile=profile, social=social)
 
 
-class UserGetView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-    queryset = get_user_model().objects.all()
+class SocialRetrieveUpdateView(RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = SocialSerializer
 
     def get_queryset(self):
-        return get_user_model().objects.filter(pk=self.request.user.id)
+        return Social.objects.filter(pk=self.kwargs['pk'])
 
 
-class ListUserEnrolledCoursesView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = UserCoursesEnrolledSerializer
-    queryset = get_user_model().objects.all()
+class ProfileRetrieveUpdateView(RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ProfileSerializer
 
     def get_queryset(self):
-        return get_user_model().objects.filter(pk=self.request.user.id)
+        return Profile.objects.filter(pk=self.kwargs['pk'])
