@@ -1,9 +1,12 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from rest_auth.registration.views import RegisterView
+
 from user_profile.serializer import \
     UserSerializer, UserDetailedSerializer,\
-    ProfileSerializer, SocialSerializer
+    ProfileSerializer, SocialSerializer, \
+    UserRegisterSerializer
 
 from core.models.user import User
 from core.models.profile import Profile, Social
@@ -25,24 +28,8 @@ class CurrentUserRetrieveView(ListAPIView):
         return User.objects.filter(pk=self.request.user.id)
 
 
-class UserCreateView(CreateAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = UserSerializer
-
-    def get_serializer_class(self, *args, **kwargs):
-        print("[get_serializer_class] : UserCreateView")
-        return UserSerializer
-
-    def post(self, request, *args, **kwargs):
-        print("[post] : UserCreateView")
-        return self.create(request, *args, **kwargs)
-
-    def perform_create(self, serializer):
-        social_payload = dict()
-        social = Social.objects.create(**social_payload)
-        profile_payload = dict()
-        profile = Profile.objects.create(**profile_payload)
-        serializer.save(profile=profile, social=social)
+class UserCreateView(RegisterView):
+    serializer_class = UserRegisterSerializer
 
 
 class SocialRetrieveUpdateView(RetrieveUpdateAPIView):
