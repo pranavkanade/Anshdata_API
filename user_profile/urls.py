@@ -7,7 +7,7 @@ from user_profile.views import (
 from rest_auth.views import (
     LoginView, LogoutView, UserDetailsView
 )
-from rest_framework_jwt.views import refresh_jwt_token
+from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 
 
 app_name = 'user_profile'
@@ -16,6 +16,7 @@ urlpatterns = [
     path('signup/', UserCreateView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='rest_logout'),
+    path('verify/', verify_jwt_token, name='jwt_verify_token'),
     path('refresh/', refresh_jwt_token, name='refresh'),
     path('me/', UserDetailsView.as_view(), name='rest_user_details'),
     path('profile/<int:pk>/', ProfileRetrieveUpdateView.as_view(),
