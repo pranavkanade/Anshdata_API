@@ -1,11 +1,14 @@
-from rest_framework.serializers import ModelSerializer
-from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from core.models import (
+    Course, Module, Assignment, Lesson, CourseEnrollment, Tag)
 
 
 class CourseSerializer(ModelSerializer):
     """
     For creating the course
     """
+    tagged_to = PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+
     class Meta:
         model = Course
         fields = (
@@ -13,6 +16,7 @@ class CourseSerializer(ModelSerializer):
             'author',
             'title',
             'subject',
+            'tagged_to',
             'category',
             'is_published',
             'credit_points',

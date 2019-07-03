@@ -19,6 +19,7 @@ class CourseSerializer(ModelSerializer):
             'title',
             'subject',
             'category',
+            'tagged_to',
             'is_published',
             'credit_points',
             'description',
