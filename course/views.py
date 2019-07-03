@@ -229,6 +229,17 @@ class CourseRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
     def get_queryset(self):
         return Course.objects.filter(pk=self.kwargs['pk'])
 
+    def get_serializer(self, *args, **kwargs):
+
+        if self.request.method == "PATCH":
+            serializer_class = creation.CourseSerializer
+            print("PATCH method called !")
+        else:
+            serializer_class = self.get_serializer_class()
+
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
+
 
 class ModuleRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
     permission_classes = (IsAuthenticated | ReadOnly,)
