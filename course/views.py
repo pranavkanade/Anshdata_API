@@ -1,8 +1,11 @@
 from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
 from core.models import User
 
-from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS, AllowAny
+from rest_framework.generics import (
+    ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView,
+    UpdateAPIView)
+from rest_framework.permissions import (
+    IsAuthenticated, BasePermission, SAFE_METHODS, AllowAny)
 from rest_framework import status
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.response import Response
@@ -46,6 +49,58 @@ class CoursesListCreateView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         self.serializer_class = creation.CourseSerializer
         return self.create(request, *args, **kwargs)
+
+
+class PublishCourse(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = creation.CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(pk=self.kwargs['pk'])
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to publish the course.", code=status.HTTP_401_UNAUTHORIZED)
+        serializer = self.get_serializer(
+            instance, data={'is_published': True}, partial=partial)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+
+class DraftCourse(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = creation.CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(pk=self.kwargs['pk'])
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to open the course for modification.", code=status.HTTP_401_UNAUTHORIZED)
+        serializer = self.get_serializer(
+            instance, data={'is_published': False}, partial=partial)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
 
 class PublishedCoursesListByUser(ListAPIView):
@@ -201,6 +256,17 @@ class RetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         if instance.author.id != request.user.id:
             raise PermissionDenied(
                 detail="Sorry, only author has the permission to update.", code=status.HTTP_401_UNAUTHORIZED)
+
+        courseId = self.kwargs['pk']
+        if 'course' in request.data.keys():
+            courseId = request.data['course']
+        course = get_object_or_404(Course, pk=courseId)
+        if course.is_published:
+            raise PermissionDenied(
+                detail=("Sorry, the course is not open for modification."
+                        " Please open the course for modification first."),
+                code=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
         serializer = self.get_serializer(
             instance, data=request.data, partial=partial)
 
