@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from core.models import (
-    Course, Module, Assignment, Lesson, CourseEnrollment, Tag)
+    Course, Module, Assignment, Lesson,
+    CourseProgress, LessonCompleted, AssignmentCompleted, Tag)
 
 
 class CourseSerializer(ModelSerializer):
@@ -72,12 +73,26 @@ class AssignmentSerializer(ModuleSerializer):
         read_only_fields = ('id', 'author', )
 
 
-class CourseEnrollSerializer(ModelSerializer):
+class CourseProgressSerializer(ModelSerializer):
     class Meta:
-        model = CourseEnrollment
+        model = CourseProgress
         fields = (
             'id',
             'candidate',
-            'course'
+            'course',
+            'current_lesson',
+            'current_assignment'
         )
         read_only_fields = ('id', 'candidate', )
+
+
+class LessonCompletedSerializer(ModelSerializer):
+    class Meta:
+        model = LessonCompleted
+        fields = '__all__'
+
+
+class AssignmentCompletedSerializer(ModelSerializer):
+    class Meta:
+        model = AssignmentCompleted
+        fields = '__all__'

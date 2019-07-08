@@ -6,7 +6,9 @@ from course.views import EnrollInCourse,\
     AssignmentListCreateView, AssignmentRetrieveUpdateDeleteView,\
     DraftedCoursesCommunityListView, DraftedCoursesSelfListView,\
     EnrolledCoursesList, EnrollmentRetrieveView,\
-    PublishedCoursesListByUser, PublishCourse, DraftCourse
+    PublishedCoursesListByUser, PublishCourse, DraftCourse, \
+    RegisterCourseProgressView, MarkLessonCompleteView, \
+    MarkAssignmentCompleteView
 
 
 app_name = 'course'
@@ -42,6 +44,15 @@ urlpatterns = [
     path('enroll/',
          EnrollInCourse.as_view(),
          name='enroll'),
+    path('progress/<int:pk>/',
+         RegisterCourseProgressView.as_view(),
+         name='register_course_progress'),
+    path('progress/done_lsn/',
+         MarkLessonCompleteView.as_view(),
+         name='mark_a_lesson_as_completed'),
+    path('progress/done_ex/',
+         MarkAssignmentCompleteView.as_view(),
+         name='mark_a_assignment_as_completed'),
     path('mod/',
          ModulesListCreateView.as_view(),
          name='create_module'),

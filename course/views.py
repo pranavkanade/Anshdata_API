@@ -1,4 +1,5 @@
-from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
+from core.models import (Course, Module, Assignment, Lesson,
+                         CourseProgress, LessonCompleted, AssignmentCompleted)
 from core.models import User
 
 from rest_framework.generics import (
@@ -122,10 +123,10 @@ class EnrolledCoursesList(ListAPIView):
 
 class EnrollmentRetrieveView(ListAPIView):
     permission_classes = (IsAuthenticated, )
-    serializer_class = listing.CourseEnrollSerializer
+    serializer_class = listing.CourseProgressSerializer
 
     def get_queryset(self):
-        return CourseEnrollment.objects.filter(candidate=self.request.user, course=self.kwargs['crs_id'])
+        return CourseProgress.objects.filter(candidate=self.request.user, course=self.kwargs['crs_id'])
 
 
 # List the unpublished courses
@@ -334,8 +335,42 @@ class AssignmentRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
 # NOTE: For now I am creating this to see what is inside the enrollment model
 class EnrollInCourse(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = creation.CourseEnrollSerializer
-    queryset = CourseEnrollment.objects.all()
+    serializer_class = creation.CourseProgressSerializer
+    queryset = CourseProgress.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(candidate=self.request.user)
+
+
+class RegisterCourseProgressView(UpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = creation.CourseProgressSerializer
+    queryset = CourseProgress.objects.all()
+
+
+class MarkLessonCompleteView(ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = creation.LessonCompletedSerializer
+    queryset = LessonCompleted.objects.all()
+
+    def get_queryset(self):
+        if self.request.method == "GET":
+            return LessonCompleted.objects.filter(
+                enrollment__candidate=self.request.user
+            )
+        else:
+            return LessonCompleted.objects.all()
+
+
+class MarkAssignmentCompleteView(ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = creation.AssignmentCompletedSerializer
+    queryset = AssignmentCompleted.objects.all()
+
+    def get_queryset(self):
+        if self.request.method == "GET":
+            return AssignmentCompleted.objects.filter(
+                enrollment__candidate=self.request.user
+            )
+        else:
+            return AssignmentCompleted.objects.all()

@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from core.models import Course, Module, Assignment, Lesson, CourseEnrollment
+from core.models import Course, Module, Assignment, Lesson, CourseProgress, LessonCompleted, AssignmentCompleted
 from user_profile.serializer import UserSerializer
 from adplatform.serializers import CategorySerializer
 
@@ -122,15 +122,35 @@ class ModuleSerializerMin(ModelSerializer):
             'lessons',
             'assignments'
         )
-        read_only_fields = ('id', )
+        read_only_fields = ('id',)
 
 
-class CourseEnrollSerializer(ModelSerializer):
+class LessonCompletedSerializer(ModelSerializer):
     class Meta:
-        model = CourseEnrollment
+        model = LessonCompleted
+        fields = '__all__'
+
+
+class AssignmentCompletedSerializer(ModelSerializer):
+    class Meta:
+        model = AssignmentCompleted
+        fields = '__all__'
+
+
+class CourseProgressSerializer(ModelSerializer):
+    completed_lessons = LessonCompletedSerializer(many=True, read_only=True)
+    completed_assignments = AssignmentCompletedSerializer(
+        many=True, read_only=True)
+
+    class Meta:
+        model = CourseProgress
         fields = (
             'id',
             'candidate',
-            'course'
+            'course',
+            'current_lesson',
+            'current_assignment',
+            'completed_lessons',
+            'completed_assignments'
         )
         read_only_fields = ('id', 'candidate', )
