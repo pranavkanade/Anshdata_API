@@ -138,6 +138,9 @@ class AssignmentCompletedSerializer(ModelSerializer):
 
 
 class CourseProgressSerializer(ModelSerializer):
+    current_lesson = LessonSerializer(many=False, read_only=True)
+    current_assignment = AssignmentSerializer(
+        many=False, read_only=True)
     completed_lessons = LessonCompletedSerializer(many=True, read_only=True)
     completed_assignments = AssignmentCompletedSerializer(
         many=True, read_only=True)
