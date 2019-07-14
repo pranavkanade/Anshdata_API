@@ -9,6 +9,9 @@ from .category import Category
 
 from .achievement import Achievement
 
+from django.db.models import signals
+from core.signals import count_students
+
 
 class Course(models.Model):
     title = models.CharField(_("Title"),
@@ -82,6 +85,11 @@ class Course(models.Model):
                                        null=True,
                                        on_delete=models.PROTECT,
                                        related_name="course")
+
+    def count_students(self):
+        count = self.enrollments.count()
+        self.students_count = count
+        self.save()
 
 
 class Module(models.Model):
@@ -285,3 +293,7 @@ class AssignmentCompleted(models.Model):
         help_text=("This field holds the record of which "
                    "assignment user has completed")
     )
+
+
+signals.post_save.connect(count_students, sender=CourseProgress)
+signals.post_delete.connect(count_students, sender=CourseProgress)

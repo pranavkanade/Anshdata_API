@@ -24,7 +24,8 @@ class CourseSerializer(ModelSerializer):
             'credit_points',
             'description',
             'modules',
-            'assignments'
+            'assignments',
+            'students_count'
         )
         read_only_fields = ('id', 'author', )
 
