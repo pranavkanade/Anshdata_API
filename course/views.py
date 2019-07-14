@@ -1,5 +1,6 @@
 from core.models import (Course, Module, Assignment, Lesson,
-                         CourseProgress, LessonCompleted, AssignmentCompleted)
+                         CourseProgress, LessonCompleted, AssignmentCompleted,
+                         Category)
 from core.models import User
 
 from rest_framework.generics import (
@@ -111,6 +112,15 @@ class PublishedCoursesListByUser(ListAPIView):
     def get_queryset(self):
         user = get_object_or_404(User, pk=self.kwargs['usr_id'])
         return Course.objects.filter(is_published=True, author=user)
+
+
+class PopularCouseListView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = listing.CourseSerializer
+
+    def get_queryset(self):
+        _q = Course.objects
+        return _q.filter(is_published=True).order_by('-students_count')[:10]
 
 
 class EnrolledCoursesList(ListAPIView):

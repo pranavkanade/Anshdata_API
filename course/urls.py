@@ -8,7 +8,7 @@ from course.views import EnrollInCourse,\
     EnrolledCoursesList, EnrollmentRetrieveView,\
     PublishedCoursesListByUser, PublishCourse, DraftCourse, \
     RegisterCourseProgressView, MarkLessonCompleteView, \
-    MarkAssignmentCompleteView
+    MarkAssignmentCompleteView, PopularCouseListView
 
 
 app_name = 'course'
@@ -20,6 +20,9 @@ urlpatterns = [
     path('pub/<int:usr_id>/',
          PublishedCoursesListByUser.as_view(),
          name='list_published_courses_by_current_user'),
+    path('top/',
+         PopularCouseListView.as_view(),
+         name='get_most_popular_courses'),
     path('enrolled/',
          EnrolledCoursesList.as_view(),
          name='enrolled_course_list'),
