@@ -116,7 +116,7 @@ class PublishedCoursesListByUser(ListAPIView):
 
 class PopularCouseListView(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = listing.CourseSerializer
+    serializer_class = detailed.CourseSerializer
 
     def get_queryset(self):
         _q = Course.objects
