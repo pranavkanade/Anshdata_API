@@ -45,7 +45,7 @@ class CoursesListCreateView(ListCreateAPIView):
         serializer.save(author=self.request.user)
 
     def get(self, request, *args, **kwargs):
-        self.serializer_class = listing.CourseSerializer
+        self.serializer_class = detailed.CourseSerializer
         return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -107,7 +107,7 @@ class DraftCourse(UpdateAPIView):
 
 class PublishedCoursesListByUser(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = listing.CourseSerializer
+    serializer_class = detailed.CourseSerializer
 
     def get_queryset(self):
         user = get_object_or_404(User, pk=self.kwargs['usr_id'])
@@ -125,7 +125,7 @@ class PopularCouseListView(ListAPIView):
 
 class EnrolledCoursesList(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = listing.CourseSerializer
+    serializer_class = detailed.CourseSerializer
 
     def get_queryset(self):
         return Course.objects.filter(enrollments__candidate=self.request.user)
@@ -142,7 +142,7 @@ class EnrollmentRetrieveView(ListAPIView):
 # List the unpublished courses
 class DraftedCoursesCommunityListView(ListAPIView):
     permission_classes = (IsAuthenticated | ReadOnly,)
-    serializer_class = listing.CourseSerializer
+    serializer_class = detailed.CourseSerializer
 
     def get_queryset(self):
         if self.request.user == AnonymousUser:
@@ -153,7 +153,7 @@ class DraftedCoursesCommunityListView(ListAPIView):
 
 class DraftedCoursesSelfListView(ListAPIView):
     permission_classes = (IsAuthenticated, )
-    serializer_class = listing.CourseSerializer
+    serializer_class = detailed.CourseSerializer
 
     def get_queryset(self):
         return Course.objects.filter(is_published=False, author=self.request.user)
