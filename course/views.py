@@ -357,6 +357,12 @@ class RegisterCourseProgressView(UpdateAPIView):
     serializer_class = creation.CourseProgressSerializer
     queryset = CourseProgress.objects.all()
 
+    def get_queryset(self):
+        return CourseProgress.objects.filter(pk=self.kwargs['pk'])
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
 
 class MarkLessonCompleteView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)

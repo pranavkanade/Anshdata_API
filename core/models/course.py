@@ -215,23 +215,23 @@ class CourseProgress(models.Model):
                                           blank=True,
                                           null=True)
     # TODO: Add last visited
-    current_lesson = models.OneToOneField(Lesson,
-                                          on_delete=models.PROTECT,
-                                          blank=True,
-                                          null=True,
-                                          help_text="Refers to the last lesson the user had subscribe to")
-    current_assignment = models.OneToOneField(Assignment,
-                                              on_delete=models.PROTECT,
-                                              blank=True,
-                                              null=True,
-                                              help_text="Refers to the last assignment the user had subscribe to")
+    current_lesson = models.ForeignKey(Lesson,
+                                       on_delete=models.PROTECT,
+                                       blank=True,
+                                       null=True,
+                                       help_text="Refers to the last lesson the user had subscribe to")
+    current_assignment = models.ForeignKey(Assignment,
+                                           on_delete=models.PROTECT,
+                                           blank=True,
+                                           null=True,
+                                           help_text="Refers to the last assignment the user had subscribe to")
     credit_earned = models.IntegerField(_('credit earned'),
                                         blank=True,
                                         default=0,
                                         help_text="Credit points a user has earned till now in the course")
 
     class Meta:
-        unique_together = (("candidate", "course"), )
+        unique_together = (("candidate", "course"),)
 
 
 class LessonCompleted(models.Model):
