@@ -16,6 +16,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import get_object_or_404
 
 from course.serializers import creation, listing, detailed
+from pprint import pprint
 
 
 class ReadOnly(BasePermission):
@@ -449,6 +450,18 @@ class EnrollInCourse(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = creation.CourseProgressSerializer
     queryset = CourseProgress.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        course = request.data['course']
+        course = get_object_or_404(Course, pk=course)
+        candidate = request.user
+        pg = CourseProgress.objects.filter(course=course, candidate=candidate)
+        pprint(pg)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         serializer.save(candidate=self.request.user)
