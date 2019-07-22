@@ -451,6 +451,12 @@ class EnrollInCourse(ListCreateAPIView):
     serializer_class = creation.CourseProgressSerializer
     queryset = CourseProgress.objects.all()
 
+    def get_queryset(self):
+        if self.request.method == "GET":
+            return CourseProgress.objects.filter(candidate=self.request.user)
+        else:
+            return CourseProgress.objects.all()
+
     def create(self, request, *args, **kwargs):
         course = request.data['course']
         course = get_object_or_404(Course, pk=course)
