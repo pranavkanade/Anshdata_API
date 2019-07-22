@@ -29,7 +29,6 @@ class CoursesListCreateView(ListCreateAPIView):
     # queryset = Course.objects.all()
 
     def get_queryset(self):
-        # import pdb; pdb.set_trace()
         if self.request.user == AnonymousUser():
             return Course.objects.filter(is_published=True)
 
@@ -255,15 +254,27 @@ class AssignmentListCreateView(ListCreateAPIView):
         return self.create(request, *args, **kwargs)
 
 
-class RetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    # NOTE: copied following fuction from the lib as it is.
-    # with small change - Added a condition to find if the
-    # request is issued by the author itself or someone else.
+class CourseRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated | ReadOnly,)
+    serializer_class = detailed.CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(pk=self.kwargs['pk'])
+
+    def get_serializer(self, *args, **kwargs):
+
+        if self.request.method == "PATCH":
+            serializer_class = creation.CourseSerializer
+            print("PATCH method called !")
+        else:
+            serializer_class = self.get_serializer_class()
+
+        kwargs['context'] = self.get_serializer_context()
+        return serializer_class(*args, **kwargs)
+
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop('partial', True)
         instance = self.get_object()
-        print(instance.author.id)
-        print(request.user.id)
         if instance.author.id != request.user.id:
             raise PermissionDenied(
                 detail="Sorry, only author has the permission to update.", code=status.HTTP_401_UNAUTHORIZED)
@@ -292,54 +303,145 @@ class RetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        self.perform_destroy(instance)
         if instance.author.id != request.user.id:
             raise PermissionDenied(
                 detail="Sorry, only author has the permission to delete.", code=status.HTTP_401_UNAUTHORIZED)
+        self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CourseRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
-    permission_classes = (IsAuthenticated | ReadOnly,)
-    serializer_class = detailed.CourseSerializer
-
-    def get_queryset(self):
-        return Course.objects.filter(pk=self.kwargs['pk'])
-
-    def get_serializer(self, *args, **kwargs):
-
-        if self.request.method == "PATCH":
-            serializer_class = creation.CourseSerializer
-            print("PATCH method called !")
-        else:
-            serializer_class = self.get_serializer_class()
-
-        kwargs['context'] = self.get_serializer_context()
-        return serializer_class(*args, **kwargs)
-
-
-class ModuleRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
+class ModuleRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = detailed.ModuleSerializer
 
     def get_queryset(self):
         return Module.objects.filter(pk=self.kwargs['pk'])
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to update.", code=status.HTTP_401_UNAUTHORIZED)
 
-class LessonRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
+        courseId = instance.course.id
+        if 'course' in request.data.keys():
+            courseId = request.data['course']
+        course = get_object_or_404(Course, pk=courseId)
+        if course.is_published:
+            raise PermissionDenied(
+                detail=("Sorry, the course is not open for modification."
+                        " Please open the course for modification first."),
+                code=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to delete.", code=status.HTTP_401_UNAUTHORIZED)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LessonRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = detailed.LessonSerializer
 
     def get_queryset(self):
         return Lesson.objects.filter(pk=self.kwargs['pk'])
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to update.", code=status.HTTP_401_UNAUTHORIZED)
 
-class AssignmentRetrieveUpdateDeleteView(RetrieveUpdateDestroyView):
+        courseId = instance.module.course.id
+        if 'course' in request.data.keys():
+            courseId = request.data['course']
+        course = get_object_or_404(Course, pk=courseId)
+        if course.is_published:
+            raise PermissionDenied(
+                detail=("Sorry, the course is not open for modification."
+                        " Please open the course for modification first."),
+                code=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to delete.", code=status.HTTP_401_UNAUTHORIZED)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AssignmentRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated | ReadOnly,)
     serializer_class = detailed.AssignmentSerializer
 
     def get_queryset(self):
         return Assignment.objects.filter(pk=self.kwargs['pk'])
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to update.", code=status.HTTP_401_UNAUTHORIZED)
+        courseId = instance.course.id
+        if 'course' in request.data.keys():
+            courseId = request.data['course']
+        course = get_object_or_404(Course, pk=courseId)
+        if course.is_published:
+            raise PermissionDenied(
+                detail=("Sorry, the course is not open for modification."
+                        " Please open the course for modification first."),
+                code=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author.id != request.user.id:
+            raise PermissionDenied(
+                detail="Sorry, only author has the permission to delete.", code=status.HTTP_401_UNAUTHORIZED)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # NOTE: For now I am creating this to see what is inside the enrollment model
