@@ -6,7 +6,9 @@ from course.views import EnrollInCourse,\
     AssignmentListCreateView, AssignmentRetrieveUpdateDeleteView,\
     DraftedCoursesCommunityListView, DraftedCoursesSelfListView,\
     EnrolledCoursesList, EnrollmentRetrieveView,\
-    PublishedCoursesListByUser
+    PublishedCoursesListByUser, PublishCourse, DraftCourse, \
+    RegisterCourseProgressView, MarkLessonCompleteView, \
+    MarkAssignmentCompleteView, PopularCouseListView
 
 
 app_name = 'course'
@@ -18,6 +20,9 @@ urlpatterns = [
     path('pub/<int:usr_id>/',
          PublishedCoursesListByUser.as_view(),
          name='list_published_courses_by_current_user'),
+    path('top/',
+         PopularCouseListView.as_view(),
+         name='get_most_popular_courses'),
     path('enrolled/',
          EnrolledCoursesList.as_view(),
          name='enrolled_course_list'),
@@ -30,12 +35,27 @@ urlpatterns = [
     path('drafts/me/',
          DraftedCoursesSelfListView.as_view(),
          name='list_unpublished_courses_by_current_user'),
+    path('<int:pk>/pub/',
+         PublishCourse.as_view(),
+         name="publish_course"),
+    path('<int:pk>/draft/',
+         DraftCourse.as_view(),
+         name="draft_course"),
     path('<int:pk>/',
          CourseRetrieveUpdateDeleteView.as_view(),
          name='course_get_update_delete'),
     path('enroll/',
          EnrollInCourse.as_view(),
          name='enroll'),
+    path('progress/<int:pk>/',
+         RegisterCourseProgressView.as_view(),
+         name='register_course_progress'),
+    path('progress/done_lsn/',
+         MarkLessonCompleteView.as_view(),
+         name='mark_a_lesson_as_completed'),
+    path('progress/done_ex/',
+         MarkAssignmentCompleteView.as_view(),
+         name='mark_a_assignment_as_completed'),
     path('mod/',
          ModulesListCreateView.as_view(),
          name='create_module'),

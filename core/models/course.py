@@ -9,6 +9,9 @@ from .category import Category
 
 from .achievement import Achievement
 
+from django.db.models import signals
+from core.signals import count_students
+
 
 class Course(models.Model):
     title = models.CharField(_("Title"),
@@ -82,6 +85,11 @@ class Course(models.Model):
                                        null=True,
                                        on_delete=models.PROTECT,
                                        related_name="course")
+
+    def count_students(self):
+        count = self.enrollments.count()
+        self.students_count = count
+        self.save()
 
 
 class Module(models.Model):
@@ -188,7 +196,7 @@ class Assignment(models.Model):
     #                                              help_text="Approx. time required to complete the assignment in hrs")
 
 
-class CourseEnrollment(models.Model):
+class CourseProgress(models.Model):
     candidate = models.ForeignKey(User,
                                   on_delete=models.CASCADE,
                                   blank=False,
@@ -207,15 +215,85 @@ class CourseEnrollment(models.Model):
                                           blank=True,
                                           null=True)
     # TODO: Add last visited
-    current_lesson = models.OneToOneField(Lesson,
-                                          on_delete=models.PROTECT,
-                                          blank=True,
-                                          null=True,
-                                          help_text="Refers to the last lesson the user had subscribe to")
+    current_lesson = models.ForeignKey(Lesson,
+                                       on_delete=models.PROTECT,
+                                       blank=True,
+                                       null=True,
+                                       help_text="Refers to the last lesson the user had subscribe to")
+    current_assignment = models.ForeignKey(Assignment,
+                                           on_delete=models.PROTECT,
+                                           blank=True,
+                                           null=True,
+                                           help_text="Refers to the last assignment the user had subscribe to")
     credit_earned = models.IntegerField(_('credit earned'),
                                         blank=True,
                                         default=0,
                                         help_text="Credit points a user has earned till now in the course")
 
     class Meta:
-        unique_together = (("candidate", "course"), )
+        unique_together = (("candidate", "course"),)
+
+
+class LessonCompleted(models.Model):
+    enrollment = models.ForeignKey(
+        CourseProgress,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        related_name="completed_lessons",
+        help_text="link to which user and course we this record belongs to"
+    )
+    module = models.IntegerField(
+        _('module id'),
+        blank=True,
+        default=0,
+        help_text=("This field holds the record of which "
+                   "module's lesson user has  completed")
+    )
+
+    lesson = models.IntegerField(
+        _('lesson id'),
+        blank=True,
+        default=0,
+        help_text=("This field holds the record of which "
+                   "lesson user has  completed")
+    )
+
+
+class AssignmentCompleted(models.Model):
+    enrollment = models.ForeignKey(
+        CourseProgress,
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False,
+        related_name="completed_assignments",
+        help_text="link to which user and course we this record belongs to"
+    )
+
+    module = models.IntegerField(
+        _('module id'),
+        blank=True,
+        default=0,
+        help_text=("This field holds the record of which "
+                   "module's asignment user has completed")
+    )
+
+    lesson = models.IntegerField(
+        _('lesson id'),
+        blank=True,
+        default=0,
+        help_text=("This field holds the record of which "
+                   "lesson's assignment user has completed")
+    )
+
+    assignment = models.IntegerField(
+        _('assignment id'),
+        blank=True,
+        default=0,
+        help_text=("This field holds the record of which "
+                   "assignment user has completed")
+    )
+
+
+signals.post_save.connect(count_students, sender=CourseProgress)
+signals.post_delete.connect(count_students, sender=CourseProgress)
