@@ -14,8 +14,6 @@ class Social(models.Model):
 
 
 class Profile(models.Model):
-    first_name = models.CharField(_('first name'), max_length=30, blank=True)
-    last_name = models.CharField(_('last name'), max_length=150, blank=True)
     profile_dp = models.ImageField(_('profile picture'), blank=True)
     bio = models.TextField(_('bio'), max_length=255, blank=True)
 
